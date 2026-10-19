@@ -1,8 +1,5 @@
 using UnityEngine;
 
-// First-person player: WASD to walk, Shift to run, Space to jump, mouse to look.
-// Movement goes through the Rigidbody, so collisions (Obstacle, node racks) and
-// the trigger zone keep working the same way they did with the ball.
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
 public class FirstPersonController : MonoBehaviour
@@ -34,7 +31,6 @@ public class FirstPersonController : MonoBehaviour
     {
         if (Cursor.lockState == CursorLockMode.Locked)
         {
-            // Yaw turns the whole body, pitch only tilts the camera
             transform.Rotate(0f, Input.GetAxis("Mouse X") * lookSpeed, 0f);
             pitch = Mathf.Clamp(pitch - Input.GetAxis("Mouse Y") * lookSpeed, -85f, 85f);
             if (cameraPivot != null)

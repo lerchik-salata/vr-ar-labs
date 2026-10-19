@@ -20,3 +20,6 @@
 # --- Build artifacts ---
 *.apk
 *.aab
+
+# --- Crash dumps ---
+mono_crash.*
