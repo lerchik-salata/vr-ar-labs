@@ -3,30 +3,65 @@ using UnityEngine.InputSystem;
 
 public class PanelToggle : MonoBehaviour
 {
-    [SerializeField] private GameObject panel;
+    [SerializeField] private GameObject[] panels;
     [SerializeField] private Key key = Key.M;
     [SerializeField] private InputActionReference toggleAction;
-    [SerializeField] private bool startVisible = true;
+    [SerializeField] private string[] controllerBindings =
+    {
+        "<XRController>{LeftHand}/{MenuButton}",
+        "<XRController>{RightHand}/{MenuButton}",
+    };
+    [SerializeField] private bool startVisible = false;
+    [SerializeField] private float cooldown = 0.25f;
+
+    [SerializeField] private bool showInFrontOfUser = true;
+    [SerializeField] private Transform head;
+    [SerializeField] private float distance = 1f;
+    [SerializeField] private float heightOffset = -0.25f;
+
+    private InputAction fallbackAction;
+    private InputAction activeAction;
+    private float lastToggleTime = float.NegativeInfinity;
+
+    public bool IsVisible
+    {
+        get
+        {
+            if (panels == null) return false;
+            foreach (var panel in panels)
+                if (panel != null && panel.activeSelf)
+                    return true;
+            return false;
+        }
+    }
 
     void Start()
     {
-        if (panel != null)
-            panel.SetActive(startVisible);
+        SetVisible(startVisible);
     }
 
     void OnEnable()
     {
-        if (toggleAction != null && toggleAction.action != null)
+        activeAction = ResolveAction();
+        if (activeAction != null)
         {
-            toggleAction.action.performed += OnTogglePerformed;
-            toggleAction.action.Enable();
+            activeAction.performed += OnTogglePerformed;
+            activeAction.Enable();
         }
     }
 
     void OnDisable()
     {
-        if (toggleAction != null && toggleAction.action != null)
-            toggleAction.action.performed -= OnTogglePerformed;
+        if (activeAction != null)
+            activeAction.performed -= OnTogglePerformed;
+        fallbackAction?.Disable();
+        activeAction = null;
+    }
+
+    void OnDestroy()
+    {
+        fallbackAction?.Dispose();
+        fallbackAction = null;
     }
 
     void Update()
@@ -38,20 +73,55 @@ public class PanelToggle : MonoBehaviour
 
     public void Toggle()
     {
-        if (panel != null)
-            panel.SetActive(!panel.activeSelf);
+        if (Time.unscaledTime - lastToggleTime < cooldown) return;
+        lastToggleTime = Time.unscaledTime;
+        SetVisible(!IsVisible);
     }
 
-    public void Show()
+    public void Show() => SetVisible(true);
+
+    public void Hide() => SetVisible(false);
+
+    public void SetVisible(bool visible)
     {
-        if (panel != null)
-            panel.SetActive(true);
+        if (panels == null) return;
+        if (visible && showInFrontOfUser)
+            PlaceInFrontOfUser();
+        foreach (var panel in panels)
+            if (panel != null)
+                panel.SetActive(visible);
     }
 
-    public void Hide()
+    public void PlaceInFrontOfUser()
     {
-        if (panel != null)
-            panel.SetActive(false);
+        var viewer = head != null ? head : Camera.main != null ? Camera.main.transform : null;
+        if (viewer == null || panels == null) return;
+
+        var forward = Vector3.ProjectOnPlane(viewer.forward, Vector3.up);
+        if (forward.sqrMagnitude < 0.0001f)
+            forward = Vector3.ProjectOnPlane(viewer.up, Vector3.up);
+        forward.Normalize();
+
+        var position = viewer.position + forward * distance + Vector3.up * heightOffset;
+        var rotation = Quaternion.LookRotation(forward, Vector3.up);
+        foreach (var panel in panels)
+            if (panel != null)
+                panel.transform.SetPositionAndRotation(position, rotation);
+    }
+
+    private InputAction ResolveAction()
+    {
+        if (toggleAction != null && toggleAction.action != null)
+            return toggleAction.action;
+
+        if (fallbackAction == null && controllerBindings != null && controllerBindings.Length > 0)
+        {
+            fallbackAction = new InputAction("TogglePanels", InputActionType.Button);
+            foreach (var binding in controllerBindings)
+                if (!string.IsNullOrEmpty(binding))
+                    fallbackAction.AddBinding(binding);
+        }
+        return fallbackAction;
     }
 
     private void OnTogglePerformed(InputAction.CallbackContext context) => Toggle();
