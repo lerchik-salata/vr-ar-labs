@@ -23,3 +23,7 @@
 
 # --- Crash dumps ---
 mono_crash.*
+
+# --- Unity crash recovery scenes ---
+/[Aa]ssets/_Recovery/
+/[Aa]ssets/_Recovery.meta
