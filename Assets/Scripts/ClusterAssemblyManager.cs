@@ -68,20 +68,20 @@ public class ClusterAssemblyManager : MonoBehaviour
         if (ready) SetLamp(readyColor, lampEmission);
 
         if (log && Application.isPlaying)
-            Debug.Log($"[Cluster] Вузлів у кластері: {online}/{Total}", this);
+            Debug.Log($"[Cluster] Nodes in cluster: {online}/{Total}", this);
 
         if (ready && !_ready)
         {
             if (Application.isPlaying)
             {
-                Debug.Log("[Cluster] Кластер зібрано: усі вузли підключено (Ready)", this);
+                Debug.Log("[Cluster] Cluster assembled: all nodes connected (Ready)", this);
                 ProceduralSfx.Play(ProceduralSfx.Kind.Ready, transform.position + Vector3.up * 1.4f, 0.8f);
             }
             onClusterReady.Invoke();
         }
         else if (!ready && _ready)
         {
-            if (Application.isPlaying) Debug.Log("[Cluster] Кластер деградував: вузол від'єднано", this);
+            if (Application.isPlaying) Debug.Log("[Cluster] Cluster degraded: node disconnected", this);
             onClusterDegraded.Invoke();
         }
         _ready = ready;
