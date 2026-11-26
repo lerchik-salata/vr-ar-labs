@@ -27,3 +27,7 @@ mono_crash.*
 # --- Unity crash recovery scenes ---
 /[Aa]ssets/_Recovery/
 /[Aa]ssets/_Recovery.meta
+
+# --- Local editor tooling (scene builders) ---
+/[Aa]ssets/[Ee]ditor/
+/[Aa]ssets/[Ee]ditor.meta
