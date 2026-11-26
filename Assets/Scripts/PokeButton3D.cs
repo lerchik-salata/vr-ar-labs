@@ -46,7 +46,7 @@ public class PokeButton3D : MonoBehaviour
         if (cap != null) cap.localPosition = _capRest + Vector3.forward * pressDepth;
         Paint(pressed);
         ProceduralSfx.Play(ProceduralSfx.Kind.Click, transform.position, 0.6f);
-        Debug.Log($"[PokeButton] '{name}' натиснуто ({args.interactorObject.GetType().Name})", this);
+        Debug.Log($"[PokeButton] '{name}' pressed ({args.interactorObject.GetType().Name})", this);
         onPressed.Invoke();
     }
 

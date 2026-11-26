@@ -66,7 +66,7 @@ public class RackSlotKey : MonoBehaviour, IXRSelectFilter
             ProceduralSfx.Play(ProceduralSfx.Kind.Error, transform.position);
         }
         var id = t.GetComponentInParent<NodeIdentity>();
-        Debug.Log($"[RackSlot] {(id != null ? id.DisplayName : t.name)} не підходить до {name} — цей слот для node-{acceptedNodeId}", this);
+        Debug.Log($"[RackSlot] {(id != null ? id.DisplayName : t.name)} does not fit {name}: this slot is for node-{acceptedNodeId}", this);
     }
 
     void OnHoverExited(HoverExitEventArgs args)

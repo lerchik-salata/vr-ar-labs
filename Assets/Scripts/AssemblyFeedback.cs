@@ -41,7 +41,7 @@ public class AssemblyFeedback : MonoBehaviour
             ? args.interactableObject.transform.name
             : "?";
         if (playSounds) ProceduralSfx.Play(ProceduralSfx.Kind.Success, transform.position);
-        Debug.Log($"[AssemblyFeedback] Вузол підключено до кластера ({nodeName} → {name})", this);
+        Debug.Log($"[AssemblyFeedback] Node connected to cluster ({nodeName} → {name})", this);
     }
 
     public void OnPartRemoved(SelectExitEventArgs args)
@@ -49,7 +49,7 @@ public class AssemblyFeedback : MonoBehaviour
         Apply(false);
         if (args != null && args.isCanceled) return;
         if (playSounds) ProceduralSfx.Play(ProceduralSfx.Kind.Unplug, transform.position);
-        Debug.Log($"[AssemblyFeedback] Вузол від'єднано від кластера ({name})", this);
+        Debug.Log($"[AssemblyFeedback] Node disconnected from cluster ({name})", this);
     }
 
     public void ShowRejected(bool rejected)
