@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +16,10 @@ public class ConfigForm : MonoBehaviour
     [SerializeField] private float defaultReplicas = 3f;
     [SerializeField] private string defaultNamespace = "default";
 
+    public event Action<ClusterConfig> Saved;
+
+    private bool hasExternalValues;
+
     void Awake()
     {
         if (replicasSlider != null)
@@ -23,20 +28,23 @@ public class ConfigForm : MonoBehaviour
 
     void Start()
     {
-        Reset();
+        // Keep a config applied before the panel was first opened
+        if (!hasExternalValues) Reset();
     }
 
     public void Save()
     {
-        if (statusText == null) return;
+        var config = new ClusterConfig
+        {
+            ns = namespaceInput != null && !string.IsNullOrWhiteSpace(namespaceInput.text)
+                ? namespaceInput.text.Trim()
+                : defaultNamespace,
+            replicas = replicasSlider != null ? Mathf.RoundToInt(replicasSlider.value) : 0,
+            autoscale = autoscaleToggle != null && autoscaleToggle.isOn,
+        };
 
-        string autoscale = autoscaleToggle != null && autoscaleToggle.isOn ? "on" : "off";
-        int replicas = replicasSlider != null ? Mathf.RoundToInt(replicasSlider.value) : 0;
-        string ns = namespaceInput != null && !string.IsNullOrWhiteSpace(namespaceInput.text)
-            ? namespaceInput.text.Trim()
-            : defaultNamespace;
-
-        statusText.text = $"Saved: namespace={ns}, replicas={replicas}, autoscaling={autoscale}";
+        ShowStatus($"Saved: namespace={config.ns}, replicas={config.replicas}, autoscaling={(config.autoscale ? "on" : "off")}");
+        Saved?.Invoke(config);
     }
 
     public void Reset()
@@ -47,10 +55,23 @@ public class ConfigForm : MonoBehaviour
             replicasSlider.value = defaultReplicas;
         if (namespaceInput != null)
             namespaceInput.text = defaultNamespace;
-        if (statusText != null)
-            statusText.text = "Defaults restored";
+        ShowStatus("Defaults restored");
 
         UpdateReplicasLabel(defaultReplicas);
+    }
+
+    public void SetValues(ClusterConfig config)
+    {
+        hasExternalValues = true;
+        if (autoscaleToggle != null) autoscaleToggle.SetIsOnWithoutNotify(config.autoscale);
+        if (replicasSlider != null) replicasSlider.SetValueWithoutNotify(config.replicas);
+        if (namespaceInput != null) namespaceInput.SetTextWithoutNotify(config.ns);
+        UpdateReplicasLabel(config.replicas);
+    }
+
+    public void ShowStatus(string message)
+    {
+        if (statusText != null) statusText.text = message;
     }
 
     private void UpdateReplicasLabel(float value)

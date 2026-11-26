@@ -52,6 +52,17 @@ public class AssemblyFeedback : MonoBehaviour
         Debug.Log($"[AssemblyFeedback] Node disconnected from cluster ({name})", this);
     }
 
+    // State mirrored from the operator who owns the node
+    public void SetRemoteInstalled(bool installed)
+    {
+        if (IsInstalled == installed) return;
+        _rejected = false;
+        Apply(installed);
+        if (playSounds)
+            ProceduralSfx.Play(installed ? ProceduralSfx.Kind.Success : ProceduralSfx.Kind.Unplug, transform.position);
+        Debug.Log($"[AssemblyFeedback] {(installed ? "Node connected to" : "Node disconnected from")} cluster by remote operator ({name})", this);
+    }
+
     public void ShowRejected(bool rejected)
     {
         _rejected = rejected && !IsInstalled;
